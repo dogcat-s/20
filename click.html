@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Trainer - Gun Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+
+        .game-area {
+            position: relative;
+            width: 900px;
+            height: 650px;
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            border: 4px solid #fff;
+            border-radius: 10px;
+            cursor: crosshair;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 15px;
+            padding: 20px;
+            align-content: center;
+            justify-content: center;
+        }
+
+        .target {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+            border-radius: 8px;
+            cursor: crosshair;
+            transition: transform 0.1s;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.6), inset -2px -2px 5px rgba(0, 0, 0, 0.3);
+            border: 3px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .target:hover {
+            transform: scale(1.1);
+        }
+
+        .target.shot {
+            animation: gunShot 0.4s ease-out;
+        }
+
+        @keyframes gunShot {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                box-shadow: 0 0 20px rgba(255, 107, 107, 0.8), inset -2px -2px 5px rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                transform: scale(1.3);
+                box-shadow: 0 0 30px rgba(255, 107, 107, 1);
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+                box-shadow: 0 0 0 rgba(255, 107, 107, 0);
+            }
+        }
+
+        .muzzle-flash {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffff00 0%, #ff8800 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: flash 0.1s ease-out forwards;
+        }
+
+        @keyframes flash {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 280px;
+            height: fit-content;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .difficulty-selector {
+            margin-bottom: 20px;
+        }
+
+        .difficulty-selector label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: #fff;
+            color: #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 70px;
+        }
+
+        .difficulty-btn:hover {
+            background: #667eea;
+            color: #fff;
+        }
+
+        .difficulty-btn.active {
+            background: #667eea;
+            color: #fff;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .start-btn {
+            background: #51cf66;
+            color: #fff;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            background: #40c057;
+            transform: translateY(-2px);
+        }
+
+        .start-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .reset-btn {
+            background: #ff922b;
+            color: #fff;
+        }
+
+        .reset-btn:hover {
+            background: #fd7e14;
+            transform: translateY(-2px);
+        }
+
+        .timer {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .accuracy {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .accuracy-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .accuracy-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            min-width: 300px;
+        }
+
+        .game-over h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .game-over p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .game-over.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translate(-50%, -60%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .game-area {
+                width: 100%;
+                max-width: 500px;
+                height: 400px;
+            }
+
+            .stats-panel {
+                width: 100%;
+                max-width: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Back to Menu</a>
+
+    <div class="container">
+        <div class="game-area" id="gameArea">
+            <div class="game-over" id="gameOverScreen">
+                <h2>🎯 Game Over!</h2>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <p>Shots Fired: <span id="shotsfired">0</span></p>
+                <p>Hits: <span id="finalhits">0</span></p>
+                <p>Accuracy: <span id="finalAccuracy">0</span>%</p>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="difficulty-selector">
+                <label>Difficulty:</label>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
+                    <button class="difficulty-btn" data-difficulty="medium">Medium</button>
+                    <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+                </div>
+            </div>
+
+            <div class="timer" id="timer">30</div>
+
+            <div class="stat-item">
+                <span class="stat-label">💥 Score:</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+
+            <div class="stat-item">
+                <span class="stat-label">🎯 Hits:</span>
+                <span class="stat-value" id="hits">0</span>
+            </div>
+
+            <div class="stat-item">
+                <span class="stat-label">🔫 Shots:</span>
+                <span class="stat-value" id="shots">0</span>
+            </div>
+
+            <div class="accuracy">
+                <div class="accuracy-label">Accuracy</div>
+                <div class="accuracy-value" id="accuracy">0%</div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn start-btn" id="startBtn">Start Game</button>
+                <button class="btn reset-btn" id="resetBtn">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        let score = 0, hits = 0, shots = 0, gameActive = false;
+        let timeLeft = 30, gameDuration = 30, difficulty = 'easy';
+        let waveDelay = 2000, gameTimer = null, waveInterval = null;
+        let currentWave = [];
+
+        const difficulties = {
+            easy: { delay: 2000, duration: 45 },
+            medium: { delay: 1200, duration: 30 },
+            hard: { delay: 600, duration: 20 }
+        };
+
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!gameActive) {
+                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    difficulty = e.target.dataset.difficulty;
+                }
+            });
+        });
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+        gameArea.addEventListener('click', (e) => {
+            if (gameActive && e.target.id === 'gameArea') {
+                shots++;
+                shootEffect(e.clientX, e.clientY);
+                document.getElementById('shots').textContent = shots;
+                updateAccuracy();
+            }
+        });
+
+        function shootEffect(x, y) {
+            const rect = gameArea.getBoundingClientRect();
+            const relX = x - rect.left;
+            const relY = y - rect.top;
+
+            const flash = document.createElement('div');
+            flash.className = 'muzzle-flash';
+            flash.style.left = (relX - 15) + 'px';
+            flash.style.top = (relY - 15) + 'px';
+            flash.style.position = 'absolute';
+            flash.style.zIndex = '999';
+            gameArea.appendChild(flash);
+
+            setTimeout(() => flash.remove(), 100);
+        }
+
+        function startGame() {
+            gameActive = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('gameOverScreen').classList.remove('show');
+            
+            const settings = difficulties[difficulty];
+            gameDuration = settings.duration;
+            waveDelay = settings.delay;
+            timeLeft = gameDuration;
+            
+            spawnWave();
+            waveInterval = setInterval(spawnWave, waveDelay);
+
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+        }
+
+        function spawnWave() {
+            if (!gameActive) return;
+            
+            // Clear previous wave
+            currentWave.forEach(target => {
+                if (target.parentNode) target.remove();
+            });
+            currentWave = [];
+
+            // Create 8x6 grid (48 cells) and randomly pick 8-12 targets
+            const totalCells = 48;
+            const targetCount = Math.floor(Math.random() * 5) + 8; // 8-12 targets
+            const randomCells = [];
+            
+            while (randomCells.length < targetCount) {
+                const randomCell = Math.floor(Math.random() * totalCells);
+                if (!randomCells.includes(randomCell)) {
+                    randomCells.push(randomCell);
+                }
+            }
+
+            randomCells.forEach(cellIndex => {
+                const target = document.createElement('div');
+                target.className = 'target';
+                target.textContent = Math.floor(Math.random() * 10);
+                target.style.opacity = '1';
+                target.style.transform = 'scale(1)';
+                target.style.gridColumn = (cellIndex % 8) + 1;
+                target.style.gridRow = Math.floor(cellIndex / 8) + 1;
+
+                target.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (gameActive && target.style.opacity === '1') {
+                        score += 10;
+                        hits++;
+                        shots++;
+                        document.getElementById('score').textContent = score;
+                        document.getElementById('hits').textContent = hits;
+                        document.getElementById('shots').textContent = shots;
+                        updateAccuracy();
+
+                        // Muzzle flash
+                        const rect = gameArea.getBoundingClientRect();
+                        const targetRect = target.getBoundingClientRect();
+                        shootEffect(targetRect.left, targetRect.top);
+
+                        target.classList.add('shot');
+                        target.style.opacity = '0';
+                        
+                        setTimeout(() => target.remove(), 400);
+                    }
+                });
+
+                gameArea.appendChild(target);
+                currentWave.push(target);
+            });
+        }
+
+        function updateAccuracy() {
+            document.getElementById('accuracy').textContent = shots === 0 ? '0%' : Math.round((hits / shots) * 100) + '%';
+        }
+
+        function endGame() {
+            gameActive = false;
+            document.getElementById('startBtn').disabled = false;
+            clearInterval(gameTimer);
+            clearInterval(waveInterval);
+            currentWave.forEach(target => {
+                if (target.parentNode) target.remove();
+            });
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('shotsfired').textContent = shots;
+            document.getElementById('finalhits').textContent = hits;
+            document.getElementById('finalAccuracy').textContent = shots > 0 ? Math.round((hits / shots) * 100) : 0;
+            document.getElementById('gameOverScreen').classList.add('show');
+        }
+
+        function resetGame() {
+            gameActive = false;
+            document.getElementById('startBtn').disabled = false;
+            clearInterval(gameTimer);
+            clearInterval(waveInterval);
+            score = hits = shots = 0;
+            timeLeft = gameDuration;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('hits').textContent = '0';
+            document.getElementById('shots').textContent = '0';
+            document.getElementById('accuracy').textContent = '0%';
+            document.getElementById('timer').textContent = gameDuration;
+            currentWave.forEach(target => {
+                if (target.parentNode) target.remove();
+            });
+            document.getElementById('gameOverScreen').classList.remove('show');
+        }
+
+        resetGame();
+    </script>
+</body>
+</html>

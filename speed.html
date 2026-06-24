@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Trainer - Gun Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+
+        .game-area {
+            position: relative;
+            width: 600px;
+            height: 500px;
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            border: 4px solid #fff;
+            border-radius: 10px;
+            cursor: crosshair;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .target {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+            border-radius: 50%;
+            cursor: crosshair;
+            transition: transform 0.1s;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
+            border: 3px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .target.shot {
+            animation: gunShot 0.4s ease-out;
+        }
+
+        @keyframes gunShot {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+                box-shadow: 0 0 0 rgba(255, 107, 107, 0);
+            }
+        }
+
+        .muzzle-flash {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffff00 0%, #ff8800 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: flash 0.1s ease-out forwards;
+            z-index: 999;
+        }
+
+        @keyframes flash {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 280px;
+            height: fit-content;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .timer {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .start-btn {
+            background: #51cf66;
+            color: #fff;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            background: #40c057;
+            transform: translateY(-2px);
+        }
+
+        .start-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .reset-btn {
+            background: #ff922b;
+            color: #fff;
+        }
+
+        .reset-btn:hover {
+            background: #fd7e14;
+            transform: translateY(-2px);
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+        }
+
+        .game-over h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .game-over p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .game-over.show {
+            display: block;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .game-area {
+                width: 100%;
+                max-width: 500px;
+                height: 400px;
+            }
+
+            .stats-panel {
+                width: 100%;
+                max-width: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Back to Menu</a>
+
+    <div class="container">
+        <div class="game-area" id="gameArea">
+            <div class="game-over" id="gameOverScreen">
+                <h2>💨 Game Over!</h2>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <p>Shots Per Second: <span id="sps">0</span></p>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="timer" id="timer">20</div>
+
+            <div class="stat-item">
+                <span class="stat-label">💥 Score:</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+
+            <div class="stat-item">
+                <span class="stat-label">🔫 SPS:</span>
+                <span class="stat-value" id="sps">0</span>
+            </div>
+
+            <div class="buttons">
+                <button class="btn start-btn" id="startBtn">Start Game</button>
+                <button class="btn reset-btn" id="resetBtn">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        let score = 0, gameActive = false, timeLeft = 20, gameTimer = null, targetInterval = null;
+
+        document.getElementById('startBtn').addEventListener('click', startSpeed);
+        document.getElementById('resetBtn').addEventListener('click', resetSpeed);
+
+        function startSpeed() {
+            gameActive = true;
+            score = 0;
+            timeLeft = 20;
+            document.getElementById('startBtn').disabled = true;
+            document.querySelectorAll('.target').forEach(t => t.remove());
+
+            spawnSpeedTarget();
+            targetInterval = setInterval(spawnSpeedTarget, 300);
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) endSpeed();
+            }, 1000);
+        }
+
+        function spawnSpeedTarget() {
+            if (!gameActive) return;
+            const target = document.createElement('div');
+            target.className = 'target';
+            target.style.left = Math.random() * (gameArea.clientWidth - 40) + 'px';
+            target.style.top = Math.random() * (gameArea.clientHeight - 40) + 'px';
+            target.textContent = '⚡';
+
+            target.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (gameActive) {
+                    score += 20;
+                    document.getElementById('score').textContent = score;
+                    
+                    const elapsedTime = 20 - timeLeft;
+                    const sps = (score / 20 / Math.max(elapsedTime, 0.1)).toFixed(2);
+                    document.getElementById('sps').textContent = sps;
+                    
+                    // Muzzle flash
+                    const rect = gameArea.getBoundingClientRect();
+                    const targetRect = target.getBoundingClientRect();
+                    const flash = document.createElement('div');
+                    flash.className = 'muzzle-flash';
+                    flash.style.left = (targetRect.left - rect.left - 15) + 'px';
+                    flash.style.top = (targetRect.top - rect.top - 15) + 'px';
+                    gameArea.appendChild(flash);
+                    setTimeout(() => flash.remove(), 100);
+
+                    target.classList.add('shot');
+                    setTimeout(() => target.remove(), 400);
+                }
+            });
+
+            gameArea.appendChild(target);
+            setTimeout(() => { if (target.parentNode) target.remove(); }, 600);
+        }
+
+        function endSpeed() {
+            gameActive = false;
+            document.getElementById('startBtn').disabled = false;
+            clearInterval(gameTimer);
+            clearInterval(targetInterval);
+            document.querySelectorAll('.target').forEach(t => t.remove());
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('sps').textContent = ((score / 20) / 20).toFixed(2);
+            document.getElementById('gameOverScreen').classList.add('show');
+        }
+
+        function resetSpeed() {
+            gameActive = false;
+            document.getElementById('startBtn').disabled = false;
+            clearInterval(gameTimer);
+            clearInterval(targetInterval);
+            score = 0;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('sps').textContent = '0';
+            document.getElementById('timer').textContent = '20';
+            document.querySelectorAll('.target').forEach(t => t.remove());
+            document.getElementById('gameOverScreen').classList.remove('show');
+        }
+
+        resetSpeed();
+    </script>
+</body>
+</html>

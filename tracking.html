@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking - Gun Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+
+        .game-area {
+            position: relative;
+            width: 600px;
+            height: 500px;
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            border: 4px solid #fff;
+            border-radius: 10px;
+            cursor: crosshair;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .tracking-target {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
+            border: 3px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .muzzle-flash {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffff00 0%, #ff8800 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: flash 0.1s ease-out forwards;
+            z-index: 999;
+        }
+
+        @keyframes flash {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 280px;
+            height: fit-content;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .timer {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .start-btn {
+            background: #51cf66;
+            color: #fff;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            background: #40c057;
+            transform: translateY(-2px);
+        }
+
+        .start-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .reset-btn {
+            background: #ff922b;
+            color: #fff;
+        }
+
+        .reset-btn:hover {
+            background: #fd7e14;
+            transform: translateY(-2px);
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+        }
+
+        .game-over h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .game-over p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .game-over.show {
+            display: block;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .game-area {
+                width: 100%;
+                max-width: 500px;
+                height: 400px;
+            }
+
+            .stats-panel {
+                width: 100%;
+                max-width: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Back to Menu</a>
+
+    <div class="container">
+        <div class="game-area" id="gameArea">
+            <div class="game-over" id="gameOverScreen">
+                <h2>🎯 Game Over!</h2>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <p>Tracking Hits: <span id="finalHits">0</span>s</p>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="timer" id="timer">30</div>
+
+            <div class="stat-item">
+                <span class="stat-label">💥 Score:</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+
+            <div class="stat-item">
+                <span class="stat-label">⏱️ Tracking:</span>
+                <span class="stat-value" id="tracking">0s</span>
+            </div>
+
+            <div class="buttons">
+                <button class="btn start-btn" id="startBtn">Start Game</button>
+                <button class="btn reset-btn" id="resetBtn">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        let score = 0, trackingTime = 0, gameActive = false;
+        let timeLeft = 30, gameTimer = null, targetInterval = null, trackingTimer = null;
+
+        let cursorX = gameArea.clientWidth / 2;
+        let cursorY = gameArea.clientHeight / 2;
+        let targetX = 300, targetY = 250;
+
+        gameArea.addEventListener('mousemove', (e) => {
+            const rect = gameArea.getBoundingClientRect();
+            cursorX = e.clientX - rect.left;
+            cursorY = e.clientY - rect.top;
+        });
+
+        gameArea.addEventListener('click', (e) => {
+            if (gameActive) {
+                const rect = gameArea.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+                
+                // Create muzzle flash
+                const flash = document.createElement('div');
+                flash.className = 'muzzle-flash';
+                flash.style.left = (clickX - 15) + 'px';
+                flash.style.top = (clickY - 15) + 'px';
+                gameArea.appendChild(flash);
+                setTimeout(() => flash.remove(), 100);
+            }
+        });
+
+        document.getElementById('startBtn').addEventListener('click', startTracking);
+        document.getElementById('resetBtn').addEventListener('click', resetTracking);
+
+        function startTracking() {
+            gameActive = true;
+            score = 0;
+            trackingTime = 0;
+            timeLeft = 30;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('gameOverScreen').classList.remove('show');
+
+            moveTarget();
+            targetInterval = setInterval(moveTarget, 1000);
+
+            trackingTimer = setInterval(checkTracking, 100);
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) endTracking();
+            }, 1000);
+        }
+
+        function moveTarget() {
+            if (!gameActive) return;
+            targetX = Math.random() * (gameArea.clientWidth - 40);
+            targetY = Math.random() * (gameArea.clientHeight - 40);
+            
+            const target = gameArea.querySelector('.tracking-target');
+            if (target) target.remove();
+
+            const newTarget = document.createElement('div');
+            newTarget.className = 'tracking-target';
+            newTarget.textContent = '🔫';
+            newTarget.style.left = targetX + 'px';
+            newTarget.style.top = targetY + 'px';
+            gameArea.appendChild(newTarget);
+        }
+
+        function checkTracking() {
+            if (!gameActive) return;
+            const dx = cursorX - (targetX + 20);
+            const dy = cursorY - (targetY + 20);
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 30) {
+                trackingTime += 0.1;
+                score = Math.floor(trackingTime * 10);
+                document.getElementById('score').textContent = score;
+                document.getElementById('tracking').textContent = trackingTime.toFixed(1) + 's';
+            }
+        }
+
+        function endTracking() {
+            gameActive = false;
+            document.getElementById('startBtn').disabled = false;
+            clearInterval(gameTimer);
+            clearInterval(targetInterval);
+            clearInterval(trackingTimer);
+            
+            const target = gameArea.querySelector('.tracking-target');
+            if (target) target.remove();
+
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalHits').textContent = trackingTime.toFixed(1);
+            document.getElementById('gameOverScreen').classList.add('show');
+        }
+
+        function resetTracking() {
+            gameActive = false;
+            document.getElementById('startBtn').disabled = false;
+            clearInterval(gameTimer);
+            clearInterval(targetInterval);
+            clearInterval(trackingTimer);
+            
+            score = 0;
+            trackingTime = 0;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('tracking').textContent = '0s';
+            document.getElementById('timer').textContent = '30';
+            
+            const target = gameArea.querySelector('.tracking-target');
+            if (target) target.remove();
+            
+            document.getElementById('gameOverScreen').classList.remove('show');
+        }
+
+        resetTracking();
+    </script>
+</body>
+</html>
