@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aim Trainer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+
+        .game-area {
+            position: relative;
+            width: 600px;
+            height: 500px;
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            border: 4px solid #fff;
+            border-radius: 10px;
+            cursor: crosshair;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .target {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.6), inset -2px -2px 5px rgba(0, 0, 0, 0.3);
+            border: 3px solid #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        .target:hover {
+            transform: scale(1.1);
+        }
+
+        .target.clicked {
+            animation: clickPop 0.4s ease-out;
+        }
+
+        @keyframes clickPop {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 280px;
+            height: fit-content;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .difficulty-selector {
+            margin-bottom: 20px;
+        }
+
+        .difficulty-selector label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: #fff;
+            color: #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 70px;
+        }
+
+        .difficulty-btn:hover {
+            background: #667eea;
+            color: #fff;
+        }
+
+        .difficulty-btn.active {
+            background: #667eea;
+            color: #fff;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .start-btn {
+            background: #51cf66;
+            color: #fff;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            background: #40c057;
+            transform: translateY(-2px);
+        }
+
+        .start-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .reset-btn {
+            background: #ff922b;
+            color: #fff;
+        }
+
+        .reset-btn:hover {
+            background: #fd7e14;
+            transform: translateY(-2px);
+        }
+
+        .timer {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .accuracy {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .accuracy-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .accuracy-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            min-width: 300px;
+        }
+
+        .game-over h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .game-over p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .game-over.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translate(-50%, -60%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+        .crosshair-cursor {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+        }
+
+        .crosshair-cursor::before {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .game-area {
+                width: 100%;
+                max-width: 500px;
+                height: 400px;
+            }
+
+            .stats-panel {
+                width: 100%;
+                max-width: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-area" id="gameArea">
+            <div class="game-over" id="gameOverScreen">
+                <h2>Game Over!</h2>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <p>Clicks: <span id="finalClicks">0</span></p>
+                <p>Hits: <span id="finalHits">0</span></p>
+                <p>Accuracy: <span id="finalAccuracy">0</span>%</p>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="difficulty-selector">
+                <label>Difficulty:</label>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
+                    <button class="difficulty-btn" data-difficulty="medium">Medium</button>
+                    <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+                </div>
+            </div>
+
+            <div class="timer" id="timer">30</div>
+
+            <div class="stat-item">
+                <span class="stat-label">Score:</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+
+            <div class="stat-item">
+                <span class="stat-label">Hits:</span>
+                <span class="stat-value" id="hits">0</span>
+            </div>
+
+            <div class="stat-item">
+                <span class="stat-label">Clicks:</span>
+                <span class="stat-value" id="clicks">0</span>
+            </div>
+
+            <div class="accuracy">
+                <div class="accuracy-label">Accuracy</div>
+                <div class="accuracy-value" id="accuracy">0%</div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn start-btn" id="startBtn">Start Game</button>
+                <button class="btn reset-btn" id="resetBtn">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const scoreDisplay = document.getElementById('score');
+        const hitsDisplay = document.getElementById('hits');
+        const clicksDisplay = document.getElementById('clicks');
+        const accuracyDisplay = document.getElementById('accuracy');
+        const timerDisplay = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+
+        let score = 0;
+        let hits = 0;
+        let clicks = 0;
+        let gameActive = false;
+        let timeLeft = 30;
+        let gameDuration = 30;
+        let difficulty = 'easy';
+        let targetSpeed = 2000;
+        let gameTimer = null;
+        let targetInterval = null;
+
+        const difficulties = {
+            easy: { speed: 2000, duration: 45 },
+            medium: { speed: 1200, duration: 30 },
+            hard: { speed: 600, duration: 20 }
+        };
+
+        // Set difficulty
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!gameActive) {
+                    difficultyBtns.forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    difficulty = e.target.dataset.difficulty;
+                }
+            });
+        });
+
+        // Start game
+        startBtn.addEventListener('click', startGame);
+        resetBtn.addEventListener('click', resetGame);
+
+        // Game click tracking
+        gameArea.addEventListener('click', (e) => {
+            if (gameActive && e.target.id === 'gameArea') {
+                clicks++;
+                clicksDisplay.textContent = clicks;
+                updateAccuracy();
+            }
+        });
+
+        function startGame() {
+            gameActive = true;
+            startBtn.disabled = true;
+            gameOverScreen.classList.remove('show');
+            
+            const settings = difficulties[difficulty];
+            gameDuration = settings.duration;
+            targetSpeed = settings.speed;
+            timeLeft = gameDuration;
+            
+            // Clear existing targets
+            document.querySelectorAll('.target').forEach(t => t.remove());
+
+            // Start spawning targets
+            spawnTarget();
+            targetInterval = setInterval(spawnTarget, targetSpeed);
+
+            // Start timer
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function spawnTarget() {
+            if (!gameActive) return;
+
+            const target = document.createElement('div');
+            target.className = 'target';
+            
+            const x = Math.random() * (gameArea.clientWidth - 40);
+            const y = Math.random() * (gameArea.clientHeight - 40);
+            
+            target.style.left = x + 'px';
+            target.style.top = y + 'px';
+            target.textContent = Math.floor(Math.random() * 10);
+
+            target.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (gameActive) {
+                    score += 10;
+                    hits++;
+                    clicks++;
+                    
+                    scoreDisplay.textContent = score;
+                    hitsDisplay.textContent = hits;
+                    clicksDisplay.textContent = clicks;
+                    updateAccuracy();
+
+                    target.classList.add('clicked');
+                    setTimeout(() => target.remove(), 400);
+                }
+            });
+
+            gameArea.appendChild(target);
+
+            // Remove target after 1.5 seconds if not clicked
+            setTimeout(() => {
+                if (target.parentNode) {
+                    target.remove();
+                }
+            }, 1500);
+        }
+
+        function updateAccuracy() {
+            if (clicks === 0) {
+                accuracyDisplay.textContent = '0%';
+            } else {
+                const accuracy = Math.round((hits / clicks) * 100);
+                accuracyDisplay.textContent = accuracy + '%';
+            }
+        }
+
+        function endGame() {
+            gameActive = false;
+            startBtn.disabled = false;
+            clearInterval(gameTimer);
+            clearInterval(targetInterval);
+            
+            // Remove all targets
+            document.querySelectorAll('.target').forEach(t => t.remove());
+
+            // Show game over screen
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalClicks').textContent = clicks;
+            document.getElementById('finalHits').textContent = hits;
+            document.getElementById('finalAccuracy').textContent = clicks > 0 ? Math.round((hits / clicks) * 100) : 0;
+            gameOverScreen.classList.add('show');
+        }
+
+        function resetGame() {
+            gameActive = false;
+            startBtn.disabled = false;
+            clearInterval(gameTimer);
+            clearInterval(targetInterval);
+            
+            score = 0;
+            hits = 0;
+            clicks = 0;
+            timeLeft = gameDuration;
+
+            scoreDisplay.textContent = '0';
+            hitsDisplay.textContent = '0';
+            clicksDisplay.textContent = '0';
+            accuracyDisplay.textContent = '0%';
+            timerDisplay.textContent = gameDuration;
+
+            document.querySelectorAll('.target').forEach(t => t.remove());
+            gameOverScreen.classList.remove('show');
+        }
+
+        // Initialize
+        resetGame();
+    </script>
+</body>
+</html>
