@@ -90,6 +90,96 @@
             color: #fff;
             font-size: 0;
             transform-style: preserve-3d;
+            overflow: hidden;
+        }
+
+        .target::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 8px;
+            background: radial-gradient(circle at 30% 30%, rgba(34, 211, 238, 0.35), transparent 60%);
+            pointer-events: none;
+        }
+
+        .target .alien-face {
+            position: relative;
+            width: 58%;
+            height: 58%;
+            display: grid;
+            place-items: center;
+            z-index: 1;
+        }
+
+        .target .alien-face .eye {
+            width: 10px;
+            height: 10px;
+            background: #22d3ee;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #22d3ee, 0 0 16px #ffffff;
+            position: absolute;
+            top: 30%;
+        }
+
+        .target .alien-face .eye.left { left: 22%; }
+        .target .alien-face .eye.right { right: 22%; }
+
+        .target .alien-face .antenna {
+            width: 3px;
+            height: 12px;
+            background: #0f172a;
+            position: absolute;
+            top: 8%;
+            border-radius: 2px;
+        }
+
+        .target .alien-face .antenna.left { left: 34%; transform: rotate(-20deg); }
+        .target .alien-face .antenna.right { right: 34%; transform: rotate(20deg); }
+
+        .target .alien-face .mouth {
+            width: 24px;
+            height: 12px;
+            border-top: 3px solid #0f172a;
+            border-radius: 20px 20px 0 0;
+            position: absolute;
+            bottom: 16%;
+        }
+
+        .target .alien-face.type-2 .eye {
+            width: 12px;
+            height: 12px;
+            top: 28%;
+            background: #ff8a00;
+            box-shadow: 0 0 8px #ff8a00;
+        }
+
+        .target .alien-face.type-2 .mouth {
+            width: 18px;
+            height: 8px;
+            border-top: 2px solid #0f172a;
+            bottom: 20%;
+        }
+
+        .target .alien-face.type-3 .eye {
+            width: 8px;
+            height: 14px;
+            border-radius: 999px;
+            top: 26%;
+            background: #7c3aed;
+            box-shadow: 0 0 8px #7c3aed;
+        }
+
+        .target .alien-face.type-3 .mouth {
+            width: 20px;
+            height: 6px;
+            border-top: 2px solid #0f172a;
+            border-radius: 999px;
+            bottom: 14%;
+        }
+
+        .target .alien-face.type-3 .antenna {
+            height: 16px;
+            top: 4%;
         }
 
         .target:hover {
@@ -528,7 +618,8 @@
         function createTarget(cellIndex) {
             const target = document.createElement('div');
             target.className = 'target';
-            target.textContent = '';
+            const faceType = ['type-1', 'type-2', 'type-3'][Math.floor(Math.random() * 3)];
+            target.innerHTML = `<div class="alien-face ${faceType}"><span class="antenna left"></span><span class="antenna right"></span><span class="eye left"></span><span class="eye right"></span><span class="mouth"></span></div>`;
             target.style.opacity = '1';
             target.style.transform = 'scale(1)';
             target.style.gridColumn = (cellIndex % 5) + 1;
