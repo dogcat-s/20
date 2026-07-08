@@ -50,17 +50,17 @@
 
         .game-area {
             position: relative;
-            width: 760px;
-            height: 760px;
-            background: linear-gradient(to bottom, #1e3c72, #2a5298);
-            border: 4px solid #fff;
-            border-radius: 10px;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle at top, #0f172a 0%, #020617 70%);
+            border: 3px solid #00f5ff;
+            border-radius: 16px;
             cursor: crosshair;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.25), inset 0 0 20px rgba(0, 245, 255, 0.15);
             overflow: hidden;
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: repeat(6, 1fr);
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
             gap: 12px;
             padding: 18px;
             align-content: center;
@@ -72,18 +72,18 @@
             width: 100%;
             height: 100%;
             min-width: 0;
-            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
-            border-radius: 8px;
+            background: linear-gradient(135deg, #ff00cc 0%, #7b2cff 45%, #00f5ff 100%);
+            border-radius: 10px;
             cursor: crosshair;
             transition: transform 0.1s;
-            box-shadow: 0 0 15px rgba(255, 107, 107, 0.6), inset -2px -2px 5px rgba(0, 0, 0, 0.3);
-            border: 3px solid #fff;
+            box-shadow: 0 0 18px rgba(255, 0, 204, 0.8), inset 0 0 12px rgba(255, 255, 255, 0.25);
+            border: 2px solid #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             color: #fff;
-            font-size: 18px;
+            font-size: 0;
         }
 
         .target:hover {
@@ -394,7 +394,7 @@
         const gameArea = document.getElementById('gameArea');
         let score = 0, hits = 0, shots = 0, gameActive = false;
         let timeLeft = 30, gameDuration = 30, difficulty = 'easy';
-        let waveDelay = 2000, gameTimer = null, waveInterval = null;
+        let gameTimer = null;
         let currentWave = [];
 
         const difficulties = {
@@ -452,7 +452,6 @@
             timeLeft = gameDuration;
             
             spawnWave();
-            waveInterval = setInterval(spawnWave, waveDelay);
 
             gameTimer = setInterval(() => {
                 timeLeft--;
@@ -461,17 +460,74 @@
             }, 1000);
         }
 
+        function createTarget(cellIndex) {
+            const target = document.createElement('div');
+            target.className = 'target';
+            target.textContent = '';
+            target.style.opacity = '1';
+            target.style.transform = 'scale(1)';
+            target.style.gridColumn = (cellIndex % 5) + 1;
+            target.style.gridRow = Math.floor(cellIndex / 5) + 1;
+            target.dataset.cellIndex = cellIndex;
+
+            target.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (gameActive && target.style.opacity === '1') {
+                    score += 10;
+                    hits++;
+                    shots++;
+                    document.getElementById('score').textContent = score;
+                    document.getElementById('hits').textContent = hits;
+                    document.getElementById('shots').textContent = shots;
+                    updateAccuracy();
+
+                    const targetRect = target.getBoundingClientRect();
+                    shootEffect(targetRect.left, targetRect.top);
+
+                    target.classList.add('shot');
+                    target.style.opacity = '0';
+                    currentWave = currentWave.filter(activeTarget => activeTarget !== target);
+                    target.remove();
+
+                    setTimeout(() => {
+                        if (!gameActive) return;
+                        const oldIndex = Number(target.dataset.cellIndex);
+                        const newIndex = getRandomCellIndex(oldIndex);
+                        const newTarget = createTarget(newIndex);
+                        gameArea.appendChild(newTarget);
+                        currentWave.push(newTarget);
+                    }, 120);
+                }
+            });
+
+            return target;
+        }
+
+        function getRandomCellIndex(excludeIndex = null) {
+            const totalCells = 25;
+            let attempts = 0;
+
+            while (attempts < 50) {
+                const randomCell = Math.floor(Math.random() * totalCells);
+                const isOccupied = currentWave.some(activeTarget => Number(activeTarget.dataset.cellIndex) === randomCell);
+                if (randomCell !== excludeIndex && !isOccupied) {
+                    return randomCell;
+                }
+                attempts++;
+            }
+
+            return excludeIndex === null ? 0 : (excludeIndex + 1) % totalCells;
+        }
+
         function spawnWave() {
             if (!gameActive) return;
-            
-            // Clear previous wave
+
             currentWave.forEach(target => {
                 if (target.parentNode) target.remove();
             });
             currentWave = [];
 
-            // Create 6x6 grid (36 cells) and randomly pick 8-12 targets
-            const totalCells = 36;
+            const totalCells = 25;
             const targetCount = Math.floor(Math.random() * 5) + 8; // 8-12 targets
             const randomCells = [];
             
@@ -483,37 +539,7 @@
             }
 
             randomCells.forEach(cellIndex => {
-                const target = document.createElement('div');
-                target.className = 'target';
-                target.textContent = Math.floor(Math.random() * 10);
-                target.style.opacity = '1';
-                target.style.transform = 'scale(1)';
-                target.style.gridColumn = (cellIndex % 6) + 1;
-                target.style.gridRow = Math.floor(cellIndex / 6) + 1;
-
-                target.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (gameActive && target.style.opacity === '1') {
-                        score += 10;
-                        hits++;
-                        shots++;
-                        document.getElementById('score').textContent = score;
-                        document.getElementById('hits').textContent = hits;
-                        document.getElementById('shots').textContent = shots;
-                        updateAccuracy();
-
-                        // Muzzle flash
-                        const rect = gameArea.getBoundingClientRect();
-                        const targetRect = target.getBoundingClientRect();
-                        shootEffect(targetRect.left, targetRect.top);
-
-                        target.classList.add('shot');
-                        target.style.opacity = '0';
-                        
-                        setTimeout(() => target.remove(), 400);
-                    }
-                });
-
+                const target = createTarget(cellIndex);
                 gameArea.appendChild(target);
                 currentWave.push(target);
             });
@@ -527,7 +553,6 @@
             gameActive = false;
             document.getElementById('startBtn').disabled = false;
             clearInterval(gameTimer);
-            clearInterval(waveInterval);
             currentWave.forEach(target => {
                 if (target.parentNode) target.remove();
             });
@@ -542,7 +567,6 @@
             gameActive = false;
             document.getElementById('startBtn').disabled = false;
             clearInterval(gameTimer);
-            clearInterval(waveInterval);
             score = hits = shots = 0;
             timeLeft = gameDuration;
             document.getElementById('score').textContent = '0';
