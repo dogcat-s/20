@@ -414,6 +414,7 @@
         let timeLeft = 30, gameDuration = 30, difficulty = 'easy';
         let gameTimer = null;
         let currentWave = [];
+        let audioContext = null;
 
         const difficulties = {
             easy: { delay: 2000, duration: 45 },
@@ -459,6 +460,52 @@
             setTimeout(() => flash.remove(), 100);
         }
 
+        function playExplosionSound() {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+
+            if (!audioContext) {
+                audioContext = new AudioContextClass();
+            }
+
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            const now = audioContext.currentTime;
+            const gainNode = audioContext.createGain();
+            gainNode.gain.setValueAtTime(0.18, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+
+            const osc = audioContext.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(260, now);
+            osc.frequency.exponentialRampToValueAtTime(70, now + 0.25);
+
+            const noiseGain = audioContext.createGain();
+            noiseGain.gain.setValueAtTime(0.06, now);
+            noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+
+            const bufferSize = audioContext.sampleRate * 0.2;
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = (Math.random() * 2 - 1) * Math.random();
+            }
+            const noise = audioContext.createBufferSource();
+            noise.buffer = buffer;
+            noise.connect(noiseGain);
+            noiseGain.connect(gainNode);
+
+            osc.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            osc.start(now);
+            noise.start(now);
+            osc.stop(now + 0.25);
+            noise.stop(now + 0.2);
+        }
+
         function startGame() {
             gameActive = true;
             document.getElementById('startBtn').disabled = true;
@@ -501,6 +548,7 @@
 
                     const targetRect = target.getBoundingClientRect();
                     shootEffect(targetRect.left, targetRect.top);
+                    playExplosionSound();
 
                     target.classList.add('shot');
                     target.style.opacity = '0';
