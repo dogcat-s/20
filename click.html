@@ -46,16 +46,17 @@
 
         .container {
             display: flex;
-            gap: 30px;
+            gap: 20px;
             flex-wrap: wrap;
             justify-content: center;
-            max-width: 1200px;
+            max-width: 1100px;
+            align-items: flex-start;
         }
 
         .game-area {
             position: relative;
-            width: 700px;
-            height: 700px;
+            width: 560px;
+            height: 560px;
             background: radial-gradient(circle at top, #08111f 0%, #030712 75%);
             border: 3px solid #22d3ee;
             border-radius: 20px;
@@ -140,10 +141,10 @@
 
         .stats-panel {
             background: linear-gradient(145deg, rgba(9, 14, 24, 0.95), rgba(15, 23, 42, 0.9));
-            padding: 30px;
+            padding: 24px;
             border-radius: 16px;
             box-shadow: 0 0 25px rgba(34, 211, 238, 0.2), 0 12px 35px rgba(0, 0, 0, 0.35);
-            width: 280px;
+            width: 250px;
             height: fit-content;
             border: 2px solid rgba(34, 211, 238, 0.35);
         }
@@ -342,7 +343,7 @@
 
             .game-area {
                 width: 100%;
-                max-width: 720px;
+                max-width: 500px;
                 height: auto;
                 aspect-ratio: 1 / 1;
             }
