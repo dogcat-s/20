@@ -50,8 +50,8 @@
 
         .game-area {
             position: relative;
-            width: 900px;
-            height: 650px;
+            width: 760px;
+            height: 760px;
             background: linear-gradient(to bottom, #1e3c72, #2a5298);
             border: 4px solid #fff;
             border-radius: 10px;
@@ -59,18 +59,19 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             overflow: hidden;
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             grid-template-rows: repeat(6, 1fr);
-            gap: 15px;
-            padding: 20px;
+            gap: 12px;
+            padding: 18px;
             align-content: center;
             justify-content: center;
         }
 
         .target {
             position: relative;
-            width: 60px;
-            height: 60px;
+            width: 100%;
+            height: 100%;
+            min-width: 0;
             background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
             border-radius: 8px;
             cursor: crosshair;
@@ -82,7 +83,7 @@
             justify-content: center;
             font-weight: bold;
             color: #fff;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .target:hover {
@@ -324,8 +325,9 @@
 
             .game-area {
                 width: 100%;
-                max-width: 500px;
-                height: 400px;
+                max-width: 720px;
+                height: auto;
+                aspect-ratio: 1 / 1;
             }
 
             .stats-panel {
@@ -468,8 +470,8 @@
             });
             currentWave = [];
 
-            // Create 8x6 grid (48 cells) and randomly pick 8-12 targets
-            const totalCells = 48;
+            // Create 6x6 grid (36 cells) and randomly pick 8-12 targets
+            const totalCells = 36;
             const targetCount = Math.floor(Math.random() * 5) + 8; // 8-12 targets
             const randomCells = [];
             
@@ -486,8 +488,8 @@
                 target.textContent = Math.floor(Math.random() * 10);
                 target.style.opacity = '1';
                 target.style.transform = 'scale(1)';
-                target.style.gridColumn = (cellIndex % 8) + 1;
-                target.style.gridRow = Math.floor(cellIndex / 8) + 1;
+                target.style.gridColumn = (cellIndex % 6) + 1;
+                target.style.gridRow = Math.floor(cellIndex / 6) + 1;
 
                 target.addEventListener('click', (e) => {
                     e.stopPropagation();
