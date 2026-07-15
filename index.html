@@ -22,28 +22,6 @@
             color: #e2f7ff;
         }
 
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #0f172a, #1e3a8a);
-            border: 2px solid #22d3ee;
-            color: #e0f7ff;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: all 0.3s;
-            z-index: 1000;
-            box-shadow: 0 0 15px rgba(34, 211, 238, 0.25);
-        }
-
-        .back-btn:hover {
-            background: linear-gradient(135deg, #1e3a8a, #22d3ee);
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
-        }
-
         .container {
             display: flex;
             gap: 20px;
@@ -104,8 +82,8 @@
 
         .target .alien-face {
             position: relative;
-            width: 58%;
-            height: 58%;
+            width: 60%;
+            height: 60%;
             display: grid;
             place-items: center;
             z-index: 1;
@@ -137,12 +115,12 @@
         .target .alien-face .antenna.right { right: 34%; transform: rotate(20deg); }
 
         .target .alien-face .mouth {
-            width: 24px;
-            height: 12px;
+            width: 26px;
+            height: 14px;
             border-top: 3px solid #0f172a;
             border-radius: 20px 20px 0 0;
             position: absolute;
-            bottom: 16%;
+            bottom: 14%;
         }
 
         .target .alien-face.type-2 .eye {
@@ -154,10 +132,11 @@
         }
 
         .target .alien-face.type-2 .mouth {
-            width: 18px;
-            height: 8px;
+            width: 20px;
+            height: 10px;
             border-top: 2px solid #0f172a;
-            bottom: 20%;
+            bottom: 18%;
+            border-radius: 999px 999px 0 0;
         }
 
         .target .alien-face.type-3 .eye {
@@ -170,16 +149,24 @@
         }
 
         .target .alien-face.type-3 .mouth {
-            width: 20px;
-            height: 6px;
+            width: 22px;
+            height: 8px;
             border-top: 2px solid #0f172a;
             border-radius: 999px;
-            bottom: 14%;
+            bottom: 12%;
         }
 
         .target .alien-face.type-3 .antenna {
             height: 16px;
             top: 4%;
+        }
+
+        .target .alien-face .eye::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.4);
         }
 
         .target:hover {
@@ -446,8 +433,6 @@
     </style>
 </head>
 <body>
-    <a href="menu.html" class="back-btn">← Back to Menu</a>
-
     <div class="container">
         <div class="game-area" id="gameArea">
             <div class="game-over" id="gameOverScreen">
