@@ -507,9 +507,9 @@
         let audioContext = null;
 
         const difficulties = {
-            easy: { delay: 2000, duration: 45 },
-            medium: { delay: 1200, duration: 30 },
-            hard: { delay: 600, duration: 20 }
+            easy: { delay: 2000, duration: 45, targetCount: 12 },
+            medium: { delay: 1200, duration: 30, targetCount: 9 },
+            hard: { delay: 600, duration: 20, targetCount: 6 }
         };
 
         document.querySelectorAll('.difficulty-btn').forEach(btn => {
@@ -685,7 +685,7 @@
             currentWave = [];
 
             const totalCells = 25;
-            const targetCount = Math.floor(Math.random() * 5) + 8; // 8-12 targets
+            const targetCount = difficulties[difficulty].targetCount;
             const randomCells = [];
             
             while (randomCells.length < targetCount) {
